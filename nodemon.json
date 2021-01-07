@@ -1,0 +1,6 @@
+{
+	"watch": ["src"],
+	"ext": ".ts,.js",
+	"ignore": [],
+	"exec": "ts-node ./src/index.ts --vmix-host 192.168.1.20 --janus-host turn.b3video.lt --debug"
+}

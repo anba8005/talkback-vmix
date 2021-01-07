@@ -1,0 +1,30 @@
+{
+	"name": "talkback-vmix",
+	"version": "0.1.0",
+	"repository": "http://github.com/anba8005/talkback-vmix",
+	"author": "anba8005",
+	"license": "MIT",
+	"engines": {
+		"node": ">= 14.x.x"
+	},
+	"scripts": {
+		"dev": "nodemon",
+		"start": "node build/index.js",
+		"postversion": "git push origin v$npm_package_version && git push origin master",
+		"build": "rimraf ./build && tsc"
+	},
+	"devDependencies": {
+		"@tsconfig/node14": "^1.0.0",
+		"@types/node": "^14.14.20",
+		"nodemon": "^2.0.7",
+		"prettier": "^2.2.1",
+		"rimraf": "^3.0.2",
+		"ts-node": "^9.1.1",
+		"typescript": "^4.1.3"
+	},
+	"dependencies": {
+		"commander": "^6.2.1",
+		"node-vmix": "^1.3.1",
+		"vmix-js-utils": "^3.8.2"
+	}
+}
