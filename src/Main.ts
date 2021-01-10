@@ -11,7 +11,7 @@ export class Main {
 		debug: boolean,
 		vmixHost: string,
 		janusHost: string,
-		janusRoom: number,
+		janusPort: number,
 	) {
 		this._vmix = new ConnectionTCP(vmixHost, {
 			autoReconnect: true,
@@ -19,7 +19,7 @@ export class Main {
 		});
 		this._vmix.on('tally', (data: TallySummary) => this._onTally(data));
 		//
-		this._janus = new Janus(debug, janusHost, janusRoom);
+		this._janus = new Janus(debug, janusHost, janusPort);
 		//
 		setTimeout(() => {
 			// taip reik :) check ConnectionTCP sources

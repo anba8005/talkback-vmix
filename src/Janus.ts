@@ -6,7 +6,7 @@ export class Janus {
 	constructor(
 		private _debug: boolean,
 		private _janusHost: string,
-		private _janusRoom: number,
+		private _janusPort: number,
 	) {}
 
 	public sendTally(data: TallySummary) {
@@ -16,7 +16,7 @@ export class Janus {
 			tally,
 			0,
 			tally.length,
-			this.janusPort,
+			this._janusPort,
 			this._janusHost,
 			(err) => {
 				if (err) {
@@ -33,9 +33,5 @@ export class Janus {
 		return {
 			pgm: data.program,
 		};
-	}
-
-	private get janusPort() {
-		return Number('100' + this._janusRoom + '4');
 	}
 }

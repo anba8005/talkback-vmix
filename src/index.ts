@@ -5,7 +5,7 @@ import { Main } from './Main';
 program
 	.option('--vmix-host <host>', 'vMix API host')
 	.option('--janus-host <host>', 'Janus server host')
-	.option('--janus-room <room>', 'Janus server room', '1')
+	.option('--janus-port <port>', 'Janus server port', '10000')
 	.option('--debug', 'Show debug info', false);
 
 // parse
@@ -32,8 +32,8 @@ if (!opts.janusHost) {
 	program.outputHelp();
 	process.exit(1);
 }
-if (opts.janusRoom && isNaN(Number(opts.janusRoom))) {
-	console.log('Invalid Janus server room option (--janus-room) - numbers only');
+if (opts.janusPort && isNaN(Number(opts.janusPort))) {
+	console.log('Invalid Janus server port option (--janus-port) - numbers only');
 	console.log();
 	program.outputHelp();
 	process.exit(1);
@@ -44,5 +44,5 @@ const main = new Main(
 	opts.debug,
 	opts.vmixHost,
 	opts.janusHost,
-	Number(opts.janusRoom),
+	Number(opts.janusPort),
 );
