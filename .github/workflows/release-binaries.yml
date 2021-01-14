@@ -1,0 +1,67 @@
+name: Release binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14"
+      - name: Install build tools
+        run: npm install -g yarn pkg modclean
+      - name: Download native binaries
+        run: yarn download-native
+      - name: Build & Package
+        run: yarn pkg
+      - name: Compress artifacts
+        run: |
+          zip --junk-paths talkback-vmix-linux bin/talkback-vmix-linux
+          zip --junk-paths talkback-vmix-mac bin/talkback-vmix-mac
+          zip --junk-paths talkback-vmix-win bin/talkback-vmix-win.exe
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          # body: |
+          #   Changes in this Release
+          #   - First Change
+          #   - Second Change
+          draft: false
+          prerelease: false
+      - name: Upload Linux Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./talkback-vmix-linux.zip
+          asset_name: talkback-vmix-linux.zip
+          asset_content_type: application/zip
+      - name: Upload Mac Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./talkback-vmix-mac.zip
+          asset_name: talkback-vmix-mac.zip
+          asset_content_type: application/zip
+      - name: Upload Win Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./talkback-vmix-win.zip
+          asset_name: talkback-vmix-win.zip
+          asset_content_type: application/zip
