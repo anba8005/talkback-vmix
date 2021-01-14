@@ -16,12 +16,6 @@ program
 program.parse(process.argv);
 const opts = program.opts();
 
-// show help if no options
-if (!process.argv.slice(2).length) {
-	program.outputHelp();
-	process.exit(1);
-}
-
 // validate
 if (!opts.vmixHost) {
 	console.log('vMix API host option (--vmix-host) is mandatory');
