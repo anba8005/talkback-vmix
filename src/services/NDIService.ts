@@ -1,13 +1,11 @@
-import { FFmpeg, FFmpegNDISource } from '../utils/FFmpeg';
+import { FFmpeg, FFmpegConfiguration, FFmpegNDISource } from '../utils/FFmpeg';
 import { logger } from '../utils/Logger';
 
 export interface NDISource extends FFmpegNDISource {}
 
-export interface NDIInputConfig {
-	name: string | null;
-}
-
 export class NDIService {
+	private _streamer?: FFmpeg;
+
 	constructor(
 		private _vmixHost: string,
 		private _janusHost: string,
@@ -18,5 +16,18 @@ export class NDIService {
 	public async findNDISources() {
 		const sources = await FFmpeg.findSources(this._vmixHost);
 		return sources;
+	}
+
+	public startNDIStream(ndiName: string, config: FFmpegConfiguration) {
+		config.videoUrl = 'rtp://' + this._janusHost + ':' + this._janusVideoPort;
+		// config.audioUrl = 'rtp://' + this._janusHost + ':' + this._janusAudioPort;
+		this._streamer = new FFmpeg(ndiName, config);
+		this._streamer.spawn();
+	}
+
+	public stopNDIStream() {
+		if (this._streamer) {
+			this._streamer.destroy();
+		}
 	}
 }

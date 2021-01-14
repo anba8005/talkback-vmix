@@ -5,6 +5,7 @@ export function getConfigDir() {
 	const variant = process.env.VARIANT;
 	return path.resolve(
 		os.homedir(),
-		'.gyvaitv-desktop' + (variant !== 'production' ? '-' + variant : ''),
+		'.gyvaitv-desktop' +
+			(variant && variant !== 'production' ? '-' + variant : ''),
 	);
 }

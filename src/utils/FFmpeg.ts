@@ -81,7 +81,7 @@ export class FFmpeg {
 
 		// add input
 		this._ffmpeg
-			.input(os.hostname().toUpperCase() + ' (' + this._ndiName + ')')
+			.input(this._ndiName)
 			.inputFormat('libndi_newtek')
 			.inputOptions([
 				'-flags +low_delay',
@@ -115,8 +115,11 @@ export class FFmpeg {
 		// add event listeners
 		this._ffmpeg.addListener('error', this._ffmpegErrorListener);
 		this._ffmpeg.addListener('end', this._ffmpegEndListener);
+		this._ffmpeg.on('stderr', (line: string) => {
+			logger.info(line);
+		});
 
-		logger.info(this._ffmpeg._getArguments());
+		// logger.info(this._ffmpeg._getArguments());
 		try {
 			this._ffmpeg.run();
 		} catch (e) {

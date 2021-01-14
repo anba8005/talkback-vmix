@@ -5,22 +5,20 @@ import { getConfigDir } from '../utils/Env';
 import { StoreTrunkHelper } from '../utils/StoreTrunkHelper';
 import { NDIStore } from './NDIStore';
 import { TallyStore } from './TallyStore';
+import { AsyncTrunkPretty } from '../utils/AsyncTrunkPretty';
 
 export class RootStore {
 	private _ndiStore: NDIStore;
 	private _tallyStore: TallyStore;
 	private _storeTrunkHelper: StoreTrunkHelper;
 
-	constructor(
-		private _ndiService: NDIService,
-		private _tallyService: TallyService,
-	) {
-		this._ndiStore = new NDIStore(_ndiService);
-		this._tallyStore = new TallyStore(_tallyService);
+	constructor(ndiService: NDIService, tallyService: TallyService) {
+		this._ndiStore = new NDIStore(ndiService);
+		this._tallyStore = new TallyStore(tallyService);
 		//
 		const storageDir = getConfigDir();
 		const storage = new LocalStorage(storageDir);
-		this._storeTrunkHelper = new StoreTrunkHelper(storage);
+		this._storeTrunkHelper = new StoreTrunkHelper(storage, AsyncTrunkPretty);
 	}
 
 	public get ndi() {
@@ -36,10 +34,15 @@ export class RootStore {
 			this._storeTrunkHelper.createStoreTrunk(
 				{
 					input: this._ndiStore._input,
+					output: this._ndiStore._output,
 				},
 				'ndiStore',
 			),
 		]);
+	}
+
+	public destroy() {
+		this._ndiStore.destroy();
 	}
 }
 

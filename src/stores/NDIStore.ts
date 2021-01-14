@@ -1,14 +1,32 @@
 import { action, makeObservable, observable, runInAction } from 'mobx';
-import { NDIInputConfig, NDIService, NDISource } from '../services/NDIService';
+import { NDIService, NDISource } from '../services/NDIService';
 import { logger } from '../utils/Logger';
+import { FFmpegConfiguration, FFMPEG_DEFAULT_CONFIG } from '../utils/FFmpeg';
 
-const defaultInputConfig: NDIInputConfig = {
+export interface InputConfig {
+	name: string | null;
+}
+
+export interface OutputConfig {
+	videoOptions: string[];
+	audioOptions: string[];
+}
+
+const defaultInputConfig: InputConfig = {
 	name: null,
+};
+
+const defaultOutputConfig: OutputConfig = {
+	videoOptions: FFMPEG_DEFAULT_CONFIG.videoOptions!,
+	audioOptions: FFMPEG_DEFAULT_CONFIG.audioOptions!,
 };
 
 export class NDIStore {
 	@observable
-	public _input: NDIInputConfig = defaultInputConfig;
+	public _input: InputConfig = defaultInputConfig;
+
+	@observable
+	public _output: OutputConfig = defaultOutputConfig;
 
 	@observable.ref
 	private _sources: NDISource[] = [];
@@ -33,7 +51,7 @@ export class NDIStore {
 	@action
 	public setInputName(name: string | null) {
 		this._input.name = name;
-		this._updateInputStream();
+		this._updateStream();
 	}
 
 	public updateNdiSources() {
@@ -44,6 +62,10 @@ export class NDIStore {
 				logger.error('Error updating ndi sources - %s', err);
 				this._setNdiSources([]);
 			});
+	}
+
+	public destroy() {
+		this._ndiService.stopNDIStream();
 	}
 
 	public async validateSavedInput() {
@@ -60,7 +82,7 @@ export class NDIStore {
 				});
 			}
 			//
-			this._updateInputStream();
+			this._updateStream();
 		}
 	}
 
@@ -69,7 +91,20 @@ export class NDIStore {
 		this._sources = sources;
 	}
 
-	private _updateInputStream() {
-		// TODO
+	private _updateStream() {
+		this._ndiService.stopNDIStream();
+		if (this._input.name) {
+			this._ndiService.startNDIStream(
+				this._input.name,
+				this._createFFmpegConfig(),
+			);
+		}
+	}
+
+	private _createFFmpegConfig() {
+		return {
+			videoOptions: this._output.videoOptions,
+			audioOptions: this._output.audioOptions,
+		} as FFmpegConfiguration;
 	}
 }

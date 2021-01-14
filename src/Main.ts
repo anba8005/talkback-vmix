@@ -28,6 +28,7 @@ export class Main {
 
 	public waitForExit() {
 		this._screen?.key(['q', 'C-c'], (ch, key) => {
+			this._rootStore.destroy();
 			return process.exit(0);
 		});
 	}
