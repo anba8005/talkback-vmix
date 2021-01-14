@@ -7,9 +7,9 @@ const tempDirectory = require('temp-dir');
 
 const chmod = util.promisify(fs.chmod);
 
-const win32 = os.platform() === 'win32';
-const mac = os.platform() === 'darwin';
-const linux = os.platform() === 'linux';
+export const win32 = os.platform() === 'win32';
+export const mac = os.platform() === 'darwin';
+export const linux = os.platform() === 'linux';
 
 //
 //

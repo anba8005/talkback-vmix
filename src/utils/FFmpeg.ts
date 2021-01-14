@@ -1,11 +1,11 @@
 import { RetryWithTimeout } from './RetryWithTimeout';
 import Ffmpeg, { FfmpegCommand } from 'fluent-ffmpeg';
-import os from 'os';
 import { logger } from './Logger';
 import {
 	getPackagedFFMpegName,
 	getTmpFFMpegName,
 	isNativeCodePackaged,
+	linux,
 } from './NativeCode';
 
 export interface FFmpegNDISource {
@@ -21,21 +21,22 @@ export interface FFmpegConfiguration {
 	audioOptions?: string[];
 	width?: number;
 	height?: number;
+	bitrate?: number;
 	extraIps?: string;
 }
 
 export const FFMPEG_DEFAULT_CONFIG: FFmpegConfiguration = {
-	width: 1280,
-	height: 720,
+	width: 960,
+	height: 540,
+	bitrate: 2000,
 	videoOptions: [
 		'-vcodec libx264',
 		'-pix_fmt yuv420p',
 		'-preset veryfast',
 		'-g 25',
-		'-b 2M',
 		'-tune zerolatency',
 	],
-	audioOptions: ['-b 64k'],
+	audioOptions: ['-b:a 64k'],
 };
 
 export class FFmpeg {
@@ -97,6 +98,7 @@ export class FFmpeg {
 			this._ffmpeg
 				.output(this._config.videoUrl)
 				.addOutputOptions(this._config.videoOptions!)
+				.addOutputOption('-b:v ' + this._config.bitrate + 'k')
 				.addOutputOption('-threads 4')
 				.withNoAudio()
 				.outputFormat('rtp')
@@ -104,7 +106,8 @@ export class FFmpeg {
 		}
 
 		// add audio
-		if (this._config.audioUrl) {
+		if (this._config.audioUrl && linux) {
+			// opus support only on linux :(
 			this._ffmpeg
 				.output(this._config.audioUrl)
 				.audioCodec('libopus')
@@ -208,7 +211,7 @@ export class FFmpeg {
 				}
 			});
 			ffmpeg.on('stderr', (line: string) => {
-				const match = line.match(/'(.+)'.+'(.+)'/);
+				const match = line.match(/'(.+)'.+'(.+)'$/);
 				if (match && match.length === 3) {
 					sources.push({
 						name: match[1],

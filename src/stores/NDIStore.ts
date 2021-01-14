@@ -7,26 +7,19 @@ export interface InputConfig {
 	name: string | null;
 }
 
-export interface OutputConfig {
-	videoOptions: string[];
-	audioOptions: string[];
-}
-
 const defaultInputConfig: InputConfig = {
 	name: null,
 };
 
-const defaultOutputConfig: OutputConfig = {
-	videoOptions: FFMPEG_DEFAULT_CONFIG.videoOptions!,
-	audioOptions: FFMPEG_DEFAULT_CONFIG.audioOptions!,
-};
-
 export class NDIStore {
 	@observable
-	public _input: InputConfig = defaultInputConfig;
+	public _input: InputConfig = Object.assign({}, defaultInputConfig);
 
 	@observable
-	public _output: OutputConfig = defaultOutputConfig;
+	public _output: FFmpegConfiguration = Object.assign(
+		{},
+		FFMPEG_DEFAULT_CONFIG,
+	);
 
 	@observable.ref
 	private _sources: NDISource[] = [];
@@ -43,15 +36,35 @@ export class NDIStore {
 		return this._input;
 	}
 
+	public get output() {
+		return this._output;
+	}
+
 	@action
 	public resetToDefaults() {
-		// TODO :)
+		this._output.bitrate = FFMPEG_DEFAULT_CONFIG.bitrate!;
+		this._output.width = FFMPEG_DEFAULT_CONFIG.width!;
+		this._output.height = FFMPEG_DEFAULT_CONFIG.height!;
+		this._restartStream();
 	}
 
 	@action
 	public setInputName(name: string | null) {
 		this._input.name = name;
-		this._updateStream();
+		this._restartStream();
+	}
+
+	@action
+	public setBitrate(bitrate: number) {
+		this._output.bitrate = bitrate;
+		this._restartStream();
+	}
+
+	@action
+	public setResolution(width: number, height: number) {
+		this._output.width = width;
+		this._output.height = height;
+		this._restartStream();
 	}
 
 	public updateNdiSources() {
@@ -82,7 +95,7 @@ export class NDIStore {
 				});
 			}
 			//
-			this._updateStream();
+			this._restartStream();
 		}
 	}
 
@@ -91,7 +104,7 @@ export class NDIStore {
 		this._sources = sources;
 	}
 
-	private _updateStream() {
+	private _restartStream() {
 		this._ndiService.stopNDIStream();
 		if (this._input.name) {
 			this._ndiService.startNDIStream(
@@ -102,9 +115,6 @@ export class NDIStore {
 	}
 
 	private _createFFmpegConfig() {
-		return {
-			videoOptions: this._output.videoOptions,
-			audioOptions: this._output.audioOptions,
-		} as FFmpegConfiguration;
+		return { ...this._output };
 	}
 }

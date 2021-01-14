@@ -10,6 +10,47 @@ interface TreeItems {
 	};
 }
 
+const bitrates = [
+	250,
+	500,
+	750,
+	1000,
+	1250,
+	1500,
+	1750,
+	2000,
+	2250,
+	2500,
+	2750,
+	3000,
+	3500,
+	4000,
+	4500,
+	5000,
+	5500,
+	6000,
+	6500,
+	7000,
+	7500,
+	8000,
+];
+
+interface Resolution {
+	width: number;
+	height: number;
+}
+
+const resolutions: Resolution[] = [
+	{ width: 1920, height: 1080 },
+	{ width: 1280, height: 720 },
+	{ width: 960, height: 540 },
+	{ width: 640, height: 360 },
+];
+
+function resolutionToString(resolution: Resolution) {
+	return resolution.width + 'x' + resolution.height;
+}
+
 export class Settings {
 	private _tree: any;
 	private _treeExtended: Map<string, boolean> = new Map();
@@ -58,6 +99,7 @@ export class Settings {
 				return {
 					sources: ndi.sources,
 					input: JSON.stringify(ndi.input),
+					output: JSON.stringify(ndi.output),
 				};
 			},
 			() => {
@@ -93,6 +135,14 @@ export class Settings {
 						}
 					},
 				},
+				Bitrate: {
+					extended: !!this._treeExtended.get('Bitrate'),
+					children: this._createBitrateSettings(),
+				},
+				Resolution: {
+					extended: !!this._treeExtended.get('Resolution'),
+					children: this._createResolutionSettings(),
+				},
 				Reset: {
 					name: 'Reset to defaults',
 					onSelect: debounce(() => {
@@ -102,6 +152,8 @@ export class Settings {
 			},
 		});
 	}
+
+	//
 
 	private _updateNdiSources = debounce(() => {
 		this._rootStore.ndi.updateNdiSources();
@@ -139,5 +191,56 @@ export class Settings {
 
 	private _updateNdiInputName = debounce((name: string) => {
 		this._rootStore.ndi.setInputName(name);
+	}, 500);
+
+	//
+
+	private _createBitrateSettings() {
+		const result: TreeItems = {};
+		const { ndi } = this._rootStore;
+		bitrates.forEach((b) => {
+			//
+			const name = b === ndi.output.bitrate ? '>' + b + 'k<' : b + 'k';
+			const desc = {
+				name,
+				onSelect: () => {
+					this._updateBitrate(b);
+				},
+			};
+			result[String(b)] = desc;
+		});
+		return result;
+	}
+
+	private _updateBitrate = debounce((bitrate) => {
+		this._rootStore.ndi.setBitrate(bitrate);
+	}, 500);
+
+	//
+
+	private _createResolutionSettings() {
+		const result: TreeItems = {};
+		const { ndi } = this._rootStore;
+		resolutions.forEach((r) => {
+			const label = resolutionToString(r);
+			//
+			const selected = resolutionToString({
+				width: ndi.output.width!,
+				height: ndi.output.height!,
+			});
+			const name = label === selected ? '>' + label + '<' : label;
+			const desc = {
+				name,
+				onSelect: () => {
+					this._updateResolution(r);
+				},
+			};
+			result[label] = desc;
+		});
+		return result;
+	}
+
+	private _updateResolution = debounce((resolution: Resolution) => {
+		this._rootStore.ndi.setResolution(resolution.width, resolution.height);
 	}, 500);
 }
