@@ -9,9 +9,12 @@
 	},
 	"scripts": {
 		"dev": "ts-node ./src/index.ts --vmix-host 192.168.1.20 --janus-host 192.168.1.20",
-		"start": "node build/index.js",
+		"start": "node build/index.js --vmix-host 192.168.1.20 --janus-host 192.168.1.20",
 		"postversion": "git push origin v$npm_package_version && git push origin master",
-		"build": "rimraf ./build && tsc"
+		"build": "rimraf ./build && tsc",
+		"compact": "modclean --run --patterns=\"default:*\" --ignore=.bin,example*,makefile*,*.min.js",
+		"pkg-staging": "cd scripts && ./pkg.sh",
+		"download-native": "cd scripts && ./download-native.sh"
 	},
 	"devDependencies": {
 		"@tsconfig/node14": "^1.0.0",

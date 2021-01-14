@@ -1,0 +1,10 @@
+{
+	"name": "talkback-vmix-mac",
+	"pkg": {
+		"assets": [
+			"native/ffmpeg.mac",
+			"native/libndi.4.dylib",
+			"/node_modules/blessed/usr/xterm"
+		]
+	}
+}

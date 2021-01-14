@@ -5,7 +5,7 @@ export function getConfigDir() {
 	const variant = process.env.VARIANT;
 	return path.resolve(
 		os.homedir(),
-		'.gyvaitv-desktop' +
+		'.talkback-vmix' +
 			(variant && variant !== 'production' ? '-' + variant : ''),
 	);
 }

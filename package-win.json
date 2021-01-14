@@ -1,0 +1,10 @@
+{
+	"name": "talkback-vmix-win",
+	"pkg": {
+		"assets": [
+			"native/ffmpeg.exe",
+			"native/Processing.NDI.Lib.x64.dll",
+			"/node_modules/blessed/usr/xterm"
+		]
+	}
+}

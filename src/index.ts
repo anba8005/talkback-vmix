@@ -6,8 +6,8 @@ import { initializeNativeCode } from './utils/NativeCode';
 
 // create options
 program
-	.option('--vmix-host <host>', 'vMix API host')
-	.option('--janus-host <host>', 'Janus server host')
+	.option('--vmix-host <host>', 'vMix API host', '127.0.0.1')
+	.option('--janus-host <host>', 'Janus server host', '127.0.0.1')
 	.option('--janus-tally-port <port>', 'Janus server tally port', '10000')
 	.option('--janus-video-port <port>', 'Janus server vodep port', '10010')
 	.option('--janus-audio-port <port>', 'Janus server vodep port', '10012');
@@ -19,7 +19,6 @@ const opts = program.opts();
 // show help if no options
 if (!process.argv.slice(2).length) {
 	program.outputHelp();
-
 	process.exit(1);
 }
 

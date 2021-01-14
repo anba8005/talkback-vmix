@@ -19,8 +19,9 @@ export class NDIService {
 	}
 
 	public startNDIStream(ndiName: string, config: FFmpegConfiguration) {
+		config.extraIps = this._vmixHost;
 		config.videoUrl = 'rtp://' + this._janusHost + ':' + this._janusVideoPort;
-		// config.audioUrl = 'rtp://' + this._janusHost + ':' + this._janusAudioPort;
+		config.audioUrl = 'rtp://' + this._janusHost + ':' + this._janusAudioPort;
 		this._streamer = new FFmpeg(ndiName, config);
 		this._streamer.spawn();
 	}

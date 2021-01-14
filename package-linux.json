@@ -1,0 +1,6 @@
+{
+	"name": "talkback-vmix-linux",
+	"pkg": {
+		"assets": ["native/ffmpeg.linux", "/node_modules/blessed/usr/xterm"]
+	}
+}
