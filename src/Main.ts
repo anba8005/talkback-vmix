@@ -1,33 +1,48 @@
-import { ConnectionTCP } from 'node-vmix';
-import { Janus } from './Janus';
-import { TallySummary } from 'vmix-js-utils/dist/types/tcp';
+import blessed from 'blessed';
+import contrib from 'blessed-contrib';
+import { Log } from './components/Log';
+import { RootStore } from './stores/RootStore';
+import { Settings } from './components/Settings';
+import { TallyLog } from './components/TallyLog';
 
 export class Main {
-	private _vmix: ConnectionTCP;
+	private _screen?: blessed.Widgets.Screen;
+	private _grid?: contrib.grid;
 
-	private _janus: Janus;
+	private _log?: Log;
+	private _settings?: Settings;
+	private _tally?: TallyLog;
 
-	constructor(
-		debug: boolean,
-		vmixHost: string,
-		janusHost: string,
-		janusPort: number,
-	) {
-		this._vmix = new ConnectionTCP(vmixHost, {
-			autoReconnect: true,
-			debug,
-		});
-		this._vmix.on('tally', (data: TallySummary) => this._onTally(data));
+	constructor(private _rootStore: RootStore) {}
+
+	public async initialize() {
+		// init
+		await this._rootStore.hydrate();
 		//
-		this._janus = new Janus(debug, janusHost, janusPort);
+		await this._rootStore.ndi.validateSavedInput();
 		//
-		setTimeout(() => {
-			// taip reik :) check ConnectionTCP sources
-			this._vmix.send('SUBSCRIBE TALLY');
-		}, 0);
+		this._rootStore.tally.connect();
+		//
+		this._createInterface();
 	}
 
-	private _onTally(data: TallySummary) {
-		this._janus.sendTally(data);
+	public waitForExit() {
+		this._screen?.key(['q', 'C-c'], (ch, key) => {
+			return process.exit(0);
+		});
+	}
+
+	private _createInterface() {
+		this._screen = blessed.screen({
+			// smartCSR: true,
+		});
+		//
+		this._grid = new contrib.grid({ rows: 2, cols: 2, screen: this._screen });
+		//
+		this._log = new Log(this._grid);
+		this._settings = new Settings(this._rootStore, this._grid);
+		this._tally = new TallyLog(this._rootStore.tally, this._grid);
+		//
+		this._screen.render();
 	}
 }

@@ -1,12 +1,16 @@
 import program from 'commander';
 import { Main } from './Main';
+import { createRootStore } from './stores/RootStore';
+import { logger } from './utils/Logger';
+import { initializeNativeCode } from './utils/NativeCode';
 
 // create options
 program
 	.option('--vmix-host <host>', 'vMix API host')
 	.option('--janus-host <host>', 'Janus server host')
-	.option('--janus-port <port>', 'Janus server port', '10000')
-	.option('--debug', 'Show debug info', false);
+	.option('--janus-tally-port <port>', 'Janus server tally port', '10000')
+	.option('--janus-video-port <port>', 'Janus server vodep port', '10010')
+	.option('--janus-audio-port <port>', 'Janus server vodep port', '10012');
 
 // parse
 program.parse(process.argv);
@@ -32,17 +36,47 @@ if (!opts.janusHost) {
 	program.outputHelp();
 	process.exit(1);
 }
-if (opts.janusPort && isNaN(Number(opts.janusPort))) {
-	console.log('Invalid Janus server port option (--janus-port) - numbers only');
+if (opts.janusTallyPort && isNaN(Number(opts.janusTallyPort))) {
+	console.log(
+		'Invalid Janus server port option (--janus-tally-port) - numbers only',
+	);
+	console.log();
+	program.outputHelp();
+	process.exit(1);
+}
+if (opts.janusVideoPort && isNaN(Number(opts.janusVideoPort))) {
+	console.log(
+		'Invalid Janus server port option (--janus-video-port) - numbers only',
+	);
+	console.log();
+	program.outputHelp();
+	process.exit(1);
+}
+if (opts.janusAudioPort && isNaN(Number(opts.janusAudioPort))) {
+	console.log(
+		'Invalid Janus server port option (--janus-audio-port) - numbers only',
+	);
 	console.log();
 	program.outputHelp();
 	process.exit(1);
 }
 
 //
-const main = new Main(
-	opts.debug,
+
+const rootStore = createRootStore(
 	opts.vmixHost,
 	opts.janusHost,
-	Number(opts.janusPort),
+	Number(opts.janusTallyPort),
+	Number(opts.janusVideoPort),
+	Number(opts.janusAudioPort),
 );
+
+const main = new Main(rootStore);
+initializeNativeCode()
+	.then(() => main.initialize())
+	.then(() => {
+		main.waitForExit();
+	})
+	.catch((err) => {
+		logger.error(err);
+	});
